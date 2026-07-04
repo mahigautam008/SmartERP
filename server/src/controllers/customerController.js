@@ -5,9 +5,14 @@ exports.getCustomers = async (req, res) => {
     const customers = await prisma.customer.findMany({
       orderBy: { createdAt: "desc" },
     });
+
     res.json(customers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("CUSTOMER API ERROR:", error);
+
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
