@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  name        String
+  phone       String?
+  address     String?
+  outstanding Float    @default(0)
+  createdAt   DateTime @default(now())
+
+  sales Sale[]
+}
+
+model Supplier {
+  id          Int      @id @default(autoincrement())
+  name        String
+  phone       String?
+  address     String?
+  outstanding Float    @default(0)
+  createdAt   DateTime @default(now())
+
+  purchases Purchase[]
+}
+
+model Item {
+  id            Int      @id @default(autoincrement())
+  name          String
+  sku           String   @unique
+  purchasePrice Float
+  sellingPrice  Float
+  gst           Float    @default(0)
+  stock         Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+}
+
+model Sale {
+  id         Int      @id @default(autoincrement())
+  invoiceNo  String   @unique
+  customerId Int
+  total      Float
+  createdAt  DateTime @default(now())
+
+  customer Customer   @relation(fields: [customerId], references: [id])
+  items    SaleItem[]
+}
+
+model SaleItem {
+  id       Int   @id @default(autoincrement())
+  saleId   Int
+  itemId   Int
+  quantity Int
+  price    Float
+
+  sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id])
+}
+
+model Purchase {
+  id         Int      @id @default(autoincrement())
+  supplierId Int
+  total      Float
+  createdAt  DateTime @default(now())
+
+  supplier Supplier       @relation(fields: [supplierId], references: [id])
+  items    PurchaseItem[]
+}
+
+model PurchaseItem {
+  id         Int   @id @default(autoincrement())
+  purchaseId Int
+  itemId     Int
+  quantity   Int
+  price      Float
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  item     Item     @relation(fields: [itemId], references: [id])
+}
